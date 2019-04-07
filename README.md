@@ -109,3 +109,30 @@ Return the list of available tags for the resource anuncios.
         "mobile"
       ]
     }
+
+### POST /anuncios
+
+Creates a new add.
+
+**Result:**
+{
+    "success": true,
+    "result": {
+        "__v": 0,
+        "nombre": "Taza",
+        "venta": true,
+        "precio": 240,
+        "foto": "taza.jpg",
+        "_id": "5caa6d05102a0a961077bb38",
+        "tags": [
+            "lifestyle"
+        ]
+    }
+}
+
+## Execute RabbitMQ image Resizer
+
+Go to imageResize folder and run
+
+    node resizer.js
+
