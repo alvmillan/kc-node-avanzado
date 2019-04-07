@@ -5,6 +5,15 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Anuncio = mongoose.model('Anuncio');
 
+const multer = require('multer')
+const upload = multer({ storage: multer.memoryStorage() })
+const path = require('path');
+var fs = require('fs');
+
+const connectionPromise = require('../../lib/connectAMQP');
+
+const queueName = 'thumbnail-resizer';
+
 router.get('/', (req, res, next) => {
 
   const start = parseInt(req.query.start) || 0;
@@ -49,6 +58,57 @@ router.get('/', (req, res, next) => {
 // Return the list of available tags
 router.get('/tags', function (req, res) {
   res.json({ ok: true, allowedTags: Anuncio.allowedTags() });
+});
+
+router.post('/', upload.single('foto'), async function (req, res) {
+  const imagePath = path.join(__dirname, '../../public/images/anuncios/');
+  const data = req.body;
+
+  if (!req.file) {
+    res.status(401).json({error: 'Please provide an image'});
+  }
+  fs.writeFile(imagePath + req.file.originalname, req.file.buffer, function (err) {
+    if (err) throw err;
+  });
+  data.foto = req.file.originalname;
+  const anuncio = new Anuncio(data);
+  const anuncioGuardado = await anuncio.save();
+
+  // conectamos con servidor AMQP
+  const conn = await connectionPromise;
+
+  // conectar un canal
+  const channel = await conn.createChannel();
+
+  // asegurar que la cola existe
+  await channel.assertQueue(queueName, {
+    durable: true // la cola sobrevive a reinicios de broker
+  });
+
+  let sendAgain = true;
+    try {
+      // mandar un mensaje
+      const mensaje = {
+        texto: imagePath + req.file.originalname
+      };
+
+      // antes de mandar el siguiente mensaje verifico si puedo hacerlo
+      if (!sendAgain) {
+        await new Promise((resolve) => channel.on('drain', resolve ) );
+      }
+
+      sendAgain = channel.sendToQueue(queueName, Buffer.from(JSON.stringify(mensaje)), 
+      {
+        persistent: true // el mensaje sobrevive a reinicios
+      });
+
+      console.log(`publicado ${mensaje.texto} con resultado ${sendAgain}`);
+    } catch (err) {
+      console.log(err);
+      process.exit(1);
+    }
+
+  res.json({ success: true, result: anuncioGuardado})
 });
 
 module.exports = router;

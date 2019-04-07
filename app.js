@@ -15,6 +15,8 @@ require('./models/Anuncio');
 
 const app = express();
 
+const jwtAuth = require('./lib/jwtAuth');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -25,15 +27,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+/**
+ * Setup de i18n
+ */
+const i18n = require('./lib/i18nConfigure')();
+app.use(i18n.init);
+
+
 // Global Template variables
 app.locals.title = 'NodePop';
 
 // Web
 app.use('/', require('./routes/index'));
 app.use('/anuncios', require('./routes/anuncios'));
+app.use('/change-lang', require('./routes/change-lang'));
 
 // API v1
-app.use('/apiv1/anuncios', require('./routes/apiv1/anuncios'));
+app.use('/apiv1/authenticate', require('./routes/loginController').postJWT)
+app.use('/apiv1/anuncios', jwtAuth(), require('./routes/apiv1/anuncios'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

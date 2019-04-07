@@ -9,8 +9,8 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-      <h1>Lista de anuncios</h1>
-      <p class="lead">Listando: <%= anuncios.length %> de <%= total %></p>
+      <h1><%= __('Lista de anuncios') %></h1>
+      <p class="lead"><%= __('Listando {{anunciosLength}} de {{total}}', {anunciosLength: anuncios.length, total: total}) %></p>
     </div>
   </div>
 
@@ -18,18 +18,18 @@
     <div class="col-md-12">
       <table class="table table-hover">
         <thead><tr>
-          <th>Nombre</th>
-          <th>Venta</th>
-          <th style="text-align: right">Precio</th>
-          <th>Foto</th>
-          <th>Tags</th>
+          <th> <%= __('Nombre')%></th>
+          <th> <%= __('Venta')%></th>
+          <th style="text-align: right"><%= __('Precio')%></th>
+          <th><%= __('Foto')%></th>
+          <th><%= __('Tags')%></th>
           <th>#</th>
         </tr></thead>
         <tbody>
 <% anuncios.forEach(anuncio => { %>
           <tr>
             <td><%= anuncio.nombre %></td>
-            <td><%= anuncio.venta ? 'Si' : 'No' %></td>
+            <td><%= anuncio.venta ? __('Si') : __('No') %></td>
             <td style="text-align: right"><%= anuncio.precio / 100 %>€</td>
             <td><img src="<%= anuncio.foto %>"></td>
             <td><%= anuncio.tags %></td>
@@ -39,20 +39,22 @@
         </tbody>
       </table>
 
-      <p>Ejemplos:</p>
+      <p><%= __('Ejemplos:') %></p>
 
       <ul>
-        <li><a href="?">Todos (max. 1000)</a></li>
-        <li><a href="?start=2&limit=2">Paginado</a></li>
-        <li><a href="?sort=precio">Ordenado por precio ascendente</a></li>
-        <li><a href="?sort=-precio">Ordenado por precio descendente</a></li>
-        <li><a href="?tag=mobile">Con tag mobile</a></li>
+        <li><a href="?"><%= __('Todos (max. 1000)') %></a></li>
+        <li><a href="?start=2&limit=2"><%= __('Paginado') %></a></li>
+        <li><a href="?sort=precio"><%= __('Ordenado por precio ascendente') %></a></li>
+        <li><a href="?sort=-precio"><%= __('Ordenado por precio descendente') %></a></li>
+        <li><a href="?tag=mobile"><%= __('Con tag mobile') %></a></li>
+        <li><a href="/change-lang/en"><%= __('EN') %></a></li>
+        <li><a href="/change-lang/es"><%= __('ES') %></a></li>
       </ul>
 
     </div>
   </div>
 
-  <a href="/">Volver a la home</a>
+  <a href="/"><%= __('Volver a la home')%></a>
 
 </div>
 <% include _footer %>
